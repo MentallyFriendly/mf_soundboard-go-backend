@@ -21,11 +21,12 @@ func main() {
 	flag.Parse()
 
 	r := mux.NewRouter()
+	s := r.PathPrefix("/api").Subrouter()
 
 	database := db.Init(*seed, *migrate)
 	defer database.Close()
 
-	api.Startup(r)
+	api.Startup(s)
 
 	r.Path("/").HandlerFunc(index).Methods("GET")
 
