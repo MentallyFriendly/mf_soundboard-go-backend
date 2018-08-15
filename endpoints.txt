@@ -1,23 +1,23 @@
 ************* SOUND ENDPOINTS *************
 
-GET /sounds
-GET /sounds/{id}
+GET /api/sounds
+GET /api/sounds/{id}
 
-POST /sounds
-POST /sounds/bulk-upload
+POST /api/sounds
+POST /api/sounds/bulk-upload
 
-PUT/PATCH /sounds/{id}
+PUT/PATCH /api/sounds/{id}
 
-DELETE /sounds/{id}
+DELETE /api/sounds/{id}
 
 
 ************* GROUP ENDPOINTS *************
 
-GET /groups
-GET /groups/{name}
+GET /api/groups
+GET /api/groups/{name}
 
-POST /groups
+POST /api/groups
 
-PUT/PATCH /groups/{id}
+PUT/PATCH /api/groups/{id}
 
-DELETE /groups/{id}
+DELETE /api/groups/{id}
