@@ -19,7 +19,7 @@ func (s sound) registerRoutes(r *mux.Router) {
 	r.Path("/sounds/{id:[0-9]+}").HandlerFunc(s.updateSound).Methods("PUT", "PATCH")
 	r.Path("/sounds").HandlerFunc(s.getSounds).Methods("GET")
 	r.Path("/sounds").HandlerFunc(s.createSound).Methods("POST")
-	r.Path("/sounds/bulk-sound-upload").HandlerFunc(s.bulkCreateSounds).Methods("POST")
+	r.Path("/sounds/bulk-upload").HandlerFunc(s.bulkCreateSounds).Methods("POST")
 	r.Path("/sounds/").HandlerFunc(s.getSounds).Methods("GET")
 }
 
