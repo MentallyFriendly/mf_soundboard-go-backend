@@ -18,6 +18,6 @@ GET /groups/{name}
 
 POST /groups
 
-PUT/PATCH /groups/{name}
+PUT/PATCH /groups/{id}
 
-DELETE /groups/{name}
+DELETE /groups/{id}
