@@ -24,3 +24,5 @@ services:
       - db
     links:
       - db
+volumes:
+  pgdata:

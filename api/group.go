@@ -14,8 +14,9 @@ type group struct{}
 
 func (g group) registerRoutes(r *mux.Router) {
 	r.Path("/groups/{name}").HandlerFunc(g.getGroup).Methods("GET")
-	r.Path("/groups/{name}").HandlerFunc(g.deleteGroup).Methods("DELETE")
-	r.Path("/groups/{name}").HandlerFunc(g.updateGroup).Methods("PUT", "PATCH")
+	r.Path("/groups/{id}").HandlerFunc(g.getGroup).Methods("GET")
+	r.Path("/groups/{id}").HandlerFunc(g.deleteGroup).Methods("DELETE")
+	r.Path("/groups/{id}").HandlerFunc(g.updateGroup).Methods("PUT", "PATCH")
 	r.Path("/groups").HandlerFunc(g.getGroups).Methods("GET")
 	r.Path("/groups").HandlerFunc(g.createGroup).Methods("POST")
 }
@@ -23,16 +24,15 @@ func (g group) registerRoutes(r *mux.Router) {
 func (g group) getGroup(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	name := vars["name"]
+	id := vars["id"]
 
-	result := db.GetGroup(name)
-	data, _ := json.Marshal(result)
-	w.Write(data)
+	result := db.GetGroup(id, name)
+	Respond(w, result)
 }
 
 func (g group) getGroups(w http.ResponseWriter, req *http.Request) {
 	result := db.GetGroups()
-	data, _ := json.Marshal(result)
-	w.Write(data)
+	Respond(w, result)
 }
 
 func (g group) createGroup(w http.ResponseWriter, req *http.Request) {
@@ -50,22 +50,20 @@ func (g group) createGroup(w http.ResponseWriter, req *http.Request) {
 	}
 
 	result := db.CreateGroup(data)
-	response, _ := json.Marshal(result)
-	w.Write(response)
+	Respond(w, result)
 }
 
 func (g group) deleteGroup(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	name := vars["name"]
+	id := vars["id"]
 
-	result := db.DeleteGroup(name)
-	response, _ := json.Marshal(result)
-	w.Write(response)
+	result := db.DeleteGroup(id)
+	Respond(w, result)
 }
 
 func (g group) updateGroup(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	name := vars["name"]
+	id := vars["id"]
 
 	var data map[string]*string
 	bytes, err := ioutil.ReadAll(req.Body)
@@ -79,7 +77,6 @@ func (g group) updateGroup(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("Error unmarshalling bytes ", err)
 	}
 
-	result := db.UpdateGroup(name, data)
-	response, _ := json.Marshal(result)
-	w.Write(response)
+	result := db.UpdateGroup(id, data)
+	Respond(w, result)
 }

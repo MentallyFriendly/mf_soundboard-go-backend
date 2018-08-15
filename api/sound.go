@@ -28,14 +28,12 @@ func (s sound) getSound(w http.ResponseWriter, req *http.Request) {
 	id := vars["id"]
 
 	result := db.GetSound(id)
-	data, _ := json.Marshal(result)
-	w.Write(data)
+	Respond(w, result)
 }
 
 func (s sound) getSounds(w http.ResponseWriter, req *http.Request) {
 	result := db.GetSounds()
-	data, _ := json.Marshal(result)
-	w.Write(data)
+	Respond(w, result)
 }
 
 func (s sound) createSound(w http.ResponseWriter, req *http.Request) {
@@ -52,8 +50,7 @@ func (s sound) createSound(w http.ResponseWriter, req *http.Request) {
 	}
 
 	result := db.CreateSound(data)
-	response, _ := json.Marshal(result)
-	w.Write(response)
+	Respond(w, result)
 }
 
 func (s sound) bulkCreateSounds(w http.ResponseWriter, req *http.Request) {
@@ -70,8 +67,7 @@ func (s sound) bulkCreateSounds(w http.ResponseWriter, req *http.Request) {
 	}
 
 	result := db.BulkCreateSounds(data)
-	response, _ := json.Marshal(result)
-	w.Write(response)
+	Respond(w, result)
 }
 
 func (s sound) deleteSound(w http.ResponseWriter, req *http.Request) {
@@ -79,8 +75,7 @@ func (s sound) deleteSound(w http.ResponseWriter, req *http.Request) {
 	id := vars["id"]
 
 	result := db.DeleteSound(id)
-	data, _ := json.Marshal(result)
-	w.Write(data)
+	Respond(w, result)
 }
 
 func (s sound) updateSound(w http.ResponseWriter, req *http.Request) {
@@ -100,6 +95,5 @@ func (s sound) updateSound(w http.ResponseWriter, req *http.Request) {
 	}
 
 	result := db.UpdateSound(id, data)
-	response, _ := json.Marshal(result)
-	w.Write(response)
+	Respond(w, result)
 }

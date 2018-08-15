@@ -1,38 +1,42 @@
 package db
 
 import (
-	"fmt"
+	"go_apps/go_api_apps/mf_soundboard/utils"
+	"net/http"
 	"strings"
 )
 
 // GetSounds func
-func GetSounds() *[]Sound {
+func GetSounds() *utils.Result {
 	sounds := []Sound{}
 	if err := db.Model(&Sound{}).Preload("Groups").Find(&sounds).Error; err != nil {
-		fmt.Println("Error fetching sounds ", err)
+		return dbWithError(err, http.StatusNotFound, "Error fetching sounds from DB")
 	}
-	return &sounds
+
+	return dbSuccess(200, &sounds)
 }
 
 // GetSound func
-func GetSound(id string) *Sound {
+func GetSound(id string) *utils.Result {
 	sound := Sound{}
-	if err := db.Model(&Sound{}).Preload("Groups").Where("id = ?", id).Find(&sound).Error; err != nil {
-		fmt.Println("Error fetching sound ", err)
+
+	err := db.Model(&Sound{}).Preload("Groups").Where("id = ?", id).Find(&sound).Error
+	if err != nil {
+		return dbWithError(err, http.StatusNotFound, "Error fetching sound from DB")
 	}
 
-	return &sound
+	return dbSuccess(200, &sound)
 }
 
 // CreateSound func
-func CreateSound(data map[string]*string) *Sound {
+func CreateSound(data map[string]*string) *utils.Result {
 	var groups []Group
 
 	if data["group_ids"] != nil {
 		jsonGroupIds := strings.Split(*data["group_ids"], ",")
 
 		if err := db.Model(&Group{}).Where("id in (?)", jsonGroupIds).Find(&groups).Error; err != nil {
-			fmt.Println("Error fetching groups")
+			return dbWithError(err, http.StatusNotFound, "Error fetching groups from DB")
 		}
 	}
 
@@ -45,14 +49,16 @@ func CreateSound(data map[string]*string) *Sound {
 	}
 
 	if err := db.Save(&sound).Error; err != nil {
-		fmt.Println("Error saving new sound ", err)
+		return dbWithError(err, http.StatusInternalServerError, "Error saving new sound to DB")
 	}
 
-	return &sound
+	return dbSuccess(200, &sound)
 }
 
 // BulkCreateSounds func
-func BulkCreateSounds(data []map[string]*string) string {
+func BulkCreateSounds(data []map[string]*string) *utils.Result {
+	result := &utils.Result{}
+
 	for _, sound := range data {
 		go func(sound map[string]*string) {
 			groups := []Group{}
@@ -60,7 +66,7 @@ func BulkCreateSounds(data []map[string]*string) string {
 			if sound["groups"] != nil {
 				jsonGroupNames := strings.Split(*sound["groups"], ",")
 				if err := db.Model(&Group{}).Where("name in (?)", jsonGroupNames).Find(&groups).Error; err != nil {
-					fmt.Println("Error fetching group by name ", err)
+					result = dbWithError(err, http.StatusNotFound, "Error fetching group by name")
 				}
 			}
 
@@ -71,51 +77,55 @@ func BulkCreateSounds(data []map[string]*string) string {
 				EmojiUnicode: sound["emoji_unicode"],
 				Groups:       groups,
 			}).Error; err != nil {
-				fmt.Println("Error saving sound ", err)
+				result = dbWithError(err, http.StatusInternalServerError, "Error saving sound to DB")
 			}
 		}(sound)
 	}
 
-	return "Successfully saved new sounds"
+	result = dbSuccess(200, "Successfully added sounds")
+	return result
 }
 
 // DeleteSound func
-func DeleteSound(id string) string {
+func DeleteSound(id string) *utils.Result {
 	sound := Sound{}
 	if err := db.Model(&Sound{}).Where("id = ?", id).Find(&sound).Error; err != nil {
-		fmt.Println("Error fetching sound for delete ", err)
+		return dbWithError(err, http.StatusNotFound, "Error fetching sound from DB")
 	}
 
 	if err := db.Delete(&sound).Error; err != nil {
-		fmt.Println("Error deleting sound ", err)
+		return dbWithError(err, http.StatusInternalServerError, "Error deleting sound from DB")
 	}
 
-	return "Successfully deleted sound from DB"
+	return dbSuccess(200, "Successfully deleted sound from DB")
 }
 
 // UpdateSound func
-func UpdateSound(id string, data map[string]*string) *Sound {
+func UpdateSound(id string, data map[string]*string) *utils.Result {
 	sound := Sound{}
 	if err := db.Model(&Sound{}).Preload("Groups").Where("id = ?", id).Find(&sound).Error; err != nil {
-		fmt.Println("Error fetching sound from db ", err)
-	}
-
-	var groups []Group
-	if data["group_ids"] != nil {
-		jsonGroupIDs := strings.Split(*data["group_ids"], ",")
-		if err := db.Model(&Group{}).Where("id in (?)", jsonGroupIDs).Find(&groups).Error; err != nil {
-			fmt.Println("Error fetching groups from db ", err)
-		}
+		return dbWithError(err, http.StatusNotFound, "Error fetching sound from DB")
 	}
 
 	if err := db.Model(&sound).Updates(&Sound{
 		Name:   data["name"],
 		Path:   data["path"],
 		Letter: data["letter"],
-		Groups: groups,
 	}).Error; err != nil {
-		fmt.Println("Error updating sound ", err)
+		return dbWithError(err, http.StatusInternalServerError, "Error updating sound")
 	}
 
-	return &sound
+	var groups []Group
+	if data["group_ids"] != nil {
+		jsonGroupIDs := strings.Split(*data["group_ids"], ",")
+		if err := db.Model(&Group{}).Where("id in (?)", jsonGroupIDs).Find(&groups).Error; err != nil {
+			return dbWithError(err, http.StatusNotFound, "Error fetching groups from DB")
+		}
+
+		if err := db.Model(&sound).Association("Groups").Replace(&groups).Error; err != nil {
+			return dbWithError(err, http.StatusInternalServerError, "Error updating groups")
+		}
+	}
+
+	return dbSuccess(200, &sound)
 }
