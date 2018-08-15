@@ -1,0 +1,23 @@
+************* SOUND ENDPOINTS *************
+
+GET /sounds
+GET /sounds/{id}
+
+POST /sounds
+POST /sounds/bulk-upload
+
+PUT/PATCH /sounds/{id}
+
+DELETE /sounds/{id}
+
+
+************* GROUP ENDPOINTS *************
+
+GET /groups
+GET /groups/{name}
+
+POST /groups
+
+PUT/PATCH /groups/{name}
+
+DELETE /groups/{name}

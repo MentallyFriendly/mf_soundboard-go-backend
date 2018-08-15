@@ -4,16 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"go_apps/go_api_apps/mf_soundboard/api"
-	"go_apps/go_api_apps/mf_soundboard/config"
 	"go_apps/go_api_apps/mf_soundboard/db"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
-
-func init() {
-	config.SetVars()
-}
 
 func main() {
 	seed := flag.Bool("seed", false, "Include to seed the DB")
