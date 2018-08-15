@@ -17,7 +17,7 @@ services:
     volumes:
       - .:/go/src/go_apps/go_api_apps/mf_soundboard
     ports:
-      - "8080:8080"
+      - "8024:8080"
     environment:
       - DB_PARAMS=postgres://admin:password@db:5432/mf_soundboard-v1?sslmode=disable
     depends_on:
