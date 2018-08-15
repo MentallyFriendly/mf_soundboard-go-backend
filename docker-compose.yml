@@ -1,0 +1,24 @@
+version: "3"
+services:
+  db:
+    image: postgres:9.6
+    volumes: 
+      - ./db/pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=mf_soundboard-v1
+      - PGDATA=/data
+  api:
+    build:
+      context: .
+      args:
+        app_env: ${APP_ENV}
+    volumes:
+      - .:/go/src/go_apps/go_api_apps/mf_soundboard
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    links:
+      - db
