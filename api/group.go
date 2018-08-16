@@ -14,7 +14,6 @@ type group struct{}
 
 func (g group) registerRoutes(r *mux.Router) {
 	r.Path("/groups/{name}").HandlerFunc(g.getGroup).Methods("GET")
-	r.Path("/groups/{id}").HandlerFunc(g.getGroup).Methods("GET")
 	r.Path("/groups/{id}").HandlerFunc(g.deleteGroup).Methods("DELETE")
 	r.Path("/groups/{id}").HandlerFunc(g.updateGroup).Methods("PUT", "PATCH")
 	r.Path("/groups").HandlerFunc(g.getGroups).Methods("GET")
@@ -24,9 +23,8 @@ func (g group) registerRoutes(r *mux.Router) {
 func (g group) getGroup(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	name := vars["name"]
-	id := vars["id"]
 
-	result := db.GetGroup(id, name)
+	result := db.GetGroup(name)
 	Respond(w, result)
 }
 

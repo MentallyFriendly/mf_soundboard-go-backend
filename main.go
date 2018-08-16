@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -23,10 +24,19 @@ func main() {
 
 	api.Startup(s)
 
+	cors := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedHeaders:   []string{"auth_token"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowCredentials: true,
+	})
+
+	handler := cors.Handler(r)
+
 	r.Path("/").HandlerFunc(index).Methods("GET")
 
 	fmt.Println("listening on port 8080..")
-	http.ListenAndServe("0.0.0.0:8080", r)
+	http.ListenAndServe("0.0.0.0:8080", handler)
 }
 
 func index(w http.ResponseWriter, req *http.Request) {

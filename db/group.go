@@ -7,25 +7,13 @@ import (
 )
 
 // GetGroup func
-func GetGroup(id, name string) *utils.Result {
-	result := &utils.Result{}
+func GetGroup(name string) *utils.Result {
 	group := Group{}
-	if len(id) > 0 {
-		if err := db.Model(&Group{}).Preload("Sounds").Where("id = ?", id).Find(&group).Error; err != nil {
-			result = dbWithError(err, http.StatusNotFound, "Error fetching group from DB")
-		}
-
-		result = dbSuccess(200, &group)
-
-	} else {
-		if err := db.Model(&Group{}).Preload("Sounds").Where("name = ?", name).Find(&group).Error; err != nil {
-			result = dbWithError(err, http.StatusNotFound, "Error fetching group from DB")
-		}
-
-		result = dbSuccess(200, &group)
+	if err := db.Model(&Group{}).Preload("Sounds").Where("name = ?", name).Find(&group).Error; err != nil {
+		return dbWithError(err, http.StatusNotFound, "Error fetching group from DB")
 	}
 
-	return result
+	return dbSuccess(200, &group)
 }
 
 // GetGroups func
