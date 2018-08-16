@@ -67,6 +67,5 @@ func runSeed() {
 }
 
 func runMigrate() {
-	db.DropTableIfExists(&Sound{}, &Group{})
 	db.AutoMigrate(&Sound{}, &Group{})
 }
