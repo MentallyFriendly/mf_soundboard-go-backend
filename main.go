@@ -22,16 +22,16 @@ func main() {
 	database := db.Init(*seed, *migrate)
 	defer database.Close()
 
-	api.Startup(r)
+	api.Startup(s)
 
 	cors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:8081"},
+		AllowedOrigins:   []string{"*"},
 		AllowedHeaders:   []string{"auth_token"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowCredentials: true,
 	})
 
-	handler := cors.Handler(s)
+	handler := cors.Handler(r)
 
 	r.Path("/").HandlerFunc(index).Methods("GET")
 
