@@ -15,4 +15,3 @@ RUN godep go build
 RUN go get -u github.com/pilu/fresh
 
 CMD fresh
-# CMD mf_soundboard

@@ -41,11 +41,11 @@ func CreateSound(data map[string]*string) *utils.Result {
 	}
 
 	sound := Sound{
-		Name:         data["name"],
-		Path:         data["path"],
-		Letter:       data["letter"],
-		EmojiUnicode: data["emoji_unicode"],
-		Groups:       groups,
+		Name:   data["name"],
+		Path:   data["path"],
+		Letter: data["letter"],
+		Emoji:  data["emoji"],
+		Groups: groups,
 	}
 
 	if err := db.Save(&sound).Error; err != nil {
@@ -71,11 +71,11 @@ func BulkCreateSounds(data []map[string]*string) *utils.Result {
 			}
 
 			if err := db.Save(&Sound{
-				Name:         sound["name"],
-				Path:         sound["path"],
-				Letter:       sound["letter"],
-				EmojiUnicode: sound["emoji_unicode"],
-				Groups:       groups,
+				Name:   sound["name"],
+				Path:   sound["path"],
+				Letter: sound["letter"],
+				Emoji:  sound["emoji"],
+				Groups: groups,
 			}).Error; err != nil {
 				result = dbWithError(err, http.StatusInternalServerError, "Error saving sound to DB")
 			}
@@ -111,6 +111,7 @@ func UpdateSound(id string, data map[string]*string) *utils.Result {
 		Name:   data["name"],
 		Path:   data["path"],
 		Letter: data["letter"],
+		Emoji:  data["emoji"],
 	}).Error; err != nil {
 		return dbWithError(err, http.StatusInternalServerError, "Error updating sound")
 	}
