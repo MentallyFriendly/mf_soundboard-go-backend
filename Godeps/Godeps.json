@@ -39,6 +39,11 @@
 			"ImportPath": "github.com/lib/pq/oid",
 			"Comment": "go1.0-cutoff-151-gba5d4f7",
 			"Rev": "ba5d4f7a35561e22fbdf7a39aa0070f4d460cfc0"
+		},
+		{
+			"ImportPath": "github.com/rs/cors",
+			"Comment": "v1.5.0-2-g1558728",
+			"Rev": "15587285ef6b6e7a3f657e2e00f9f271883bcf22"
 		}
 	]
 }

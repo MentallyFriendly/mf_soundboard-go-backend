@@ -22,7 +22,7 @@ func main() {
 	database := db.Init(*seed, *migrate)
 	defer database.Close()
 
-	api.Startup(s)
+	api.Startup(r)
 
 	cors := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
@@ -31,7 +31,7 @@ func main() {
 		AllowCredentials: true,
 	})
 
-	handler := cors.Handler(r)
+	handler := cors.Handler(s)
 
 	r.Path("/").HandlerFunc(index).Methods("GET")
 
