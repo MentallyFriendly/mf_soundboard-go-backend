@@ -3,8 +3,16 @@ package db
 import (
 	"go_apps/go_api_apps/mf_soundboard/utils"
 	"net/http"
-	"strings"
 )
+
+// SoundPayload type
+type SoundPayload struct {
+	Name     *string `json:"name"`
+	Path     *string `json:"path"`
+	Letter   *string `json:"letter"`
+	Emoji    *string `json:"emoji"`
+	GroupIDs *[]int  `json:"group_ids"`
+}
 
 // GetSounds func
 func GetSounds() *utils.Result {
@@ -29,22 +37,20 @@ func GetSound(id string) *utils.Result {
 }
 
 // CreateSound func
-func CreateSound(data map[string]*string) *utils.Result {
+func CreateSound(data *SoundPayload) *utils.Result {
 	var groups []Group
 
-	if data["group_ids"] != nil {
-		jsonGroupIds := strings.Split(*data["group_ids"], ",")
-
-		if err := db.Model(&Group{}).Where("id in (?)", jsonGroupIds).Find(&groups).Error; err != nil {
+	if len(*data.GroupIDs) > 0 {
+		if err := db.Model(&Group{}).Where("id in (?)", *data.GroupIDs).Find(&groups).Error; err != nil {
 			return dbWithError(err, http.StatusNotFound, "Error fetching groups from DB")
 		}
 	}
 
 	sound := Sound{
-		Name:   data["name"],
-		Path:   data["path"],
-		Letter: data["letter"],
-		Emoji:  data["emoji"],
+		Name:   data.Name,
+		Path:   data.Path,
+		Letter: data.Letter,
+		Emoji:  data.Emoji,
 		Groups: groups,
 	}
 
@@ -56,34 +62,35 @@ func CreateSound(data map[string]*string) *utils.Result {
 }
 
 // BulkCreateSounds func
-func BulkCreateSounds(data []map[string]*string) *utils.Result {
-	result := &utils.Result{}
-
+func BulkCreateSounds(data []*SoundPayload) *utils.Result {
+	var result *utils.Result
 	for _, sound := range data {
-		go func(sound map[string]*string) {
+		go func(sound *SoundPayload) {
 			groups := []Group{}
-
-			if sound["groups"] != nil {
-				jsonGroupNames := strings.Split(*sound["groups"], ",")
-				if err := db.Model(&Group{}).Where("name in (?)", jsonGroupNames).Find(&groups).Error; err != nil {
+			if len(*sound.GroupIDs) > 0 {
+				if err := db.Model(&Group{}).Where("id in (?)", *sound.GroupIDs).Find(&groups).Error; err != nil {
 					result = dbWithError(err, http.StatusNotFound, "Error fetching group by name")
+					return
 				}
 			}
 
 			if err := db.Save(&Sound{
-				Name:   sound["name"],
-				Path:   sound["path"],
-				Letter: sound["letter"],
-				Emoji:  sound["emoji"],
+				Name:   sound.Name,
+				Path:   sound.Path,
+				Letter: sound.Letter,
+				Emoji:  sound.Emoji,
 				Groups: groups,
 			}).Error; err != nil {
 				result = dbWithError(err, http.StatusInternalServerError, "Error saving sound to DB")
+				return
 			}
 		}(sound)
+		if result != nil {
+			return result
+		}
 	}
 
-	result = dbSuccess(200, "Successfully added sounds")
-	return result
+	return dbSuccess(200, "Successfully added sounds")
 }
 
 // DeleteSound func
@@ -101,30 +108,29 @@ func DeleteSound(id string) *utils.Result {
 }
 
 // UpdateSound func
-func UpdateSound(id string, data map[string]*string) *utils.Result {
+func UpdateSound(id string, data *SoundPayload) *utils.Result {
 	sound := Sound{}
 	if err := db.Model(&Sound{}).Preload("Groups").Where("id = ?", id).Find(&sound).Error; err != nil {
 		return dbWithError(err, http.StatusNotFound, "Error fetching sound from DB")
 	}
 
 	if err := db.Model(&sound).Updates(&Sound{
-		Name:   data["name"],
-		Path:   data["path"],
-		Letter: data["letter"],
-		Emoji:  data["emoji"],
+		Name:   data.Name,
+		Path:   data.Path,
+		Letter: data.Letter,
+		Emoji:  data.Emoji,
 	}).Error; err != nil {
 		return dbWithError(err, http.StatusInternalServerError, "Error updating sound")
 	}
 
 	var groups []Group
-	if data["group_ids"] != nil {
-		jsonGroupIDs := strings.Split(*data["group_ids"], ",")
-		if err := db.Model(&Group{}).Where("id in (?)", jsonGroupIDs).Find(&groups).Error; err != nil {
+	if len(*data.GroupIDs) > 0 {
+		if err := db.Model(&Group{}).Where("id in (?)", *data.GroupIDs).Find(&groups).Error; err != nil {
 			return dbWithError(err, http.StatusNotFound, "Error fetching groups from DB")
 		}
 
 		if err := db.Model(&sound).Association("Groups").Replace(&groups).Error; err != nil {
-			return dbWithError(err, http.StatusInternalServerError, "Error updating groups")
+			return dbWithError(err, http.StatusInternalServerError, "Error updating new groups")
 		}
 	}
 

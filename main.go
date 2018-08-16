@@ -14,12 +14,13 @@ import (
 func main() {
 	seed := flag.Bool("seed", false, "Include to seed the DB")
 	migrate := flag.Bool("migrate", false, "Include to run migrations on the DB")
+	drop := flag.Bool("drop", false, "Include to drop and recreate the DB")
 	flag.Parse()
 
 	r := mux.NewRouter()
 	s := r.PathPrefix("/api").Subrouter()
 
-	database := db.Init(*seed, *migrate)
+	database := db.Init(*seed, *migrate, *drop)
 	defer database.Close()
 
 	api.Startup(s)

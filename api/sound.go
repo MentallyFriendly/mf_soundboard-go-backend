@@ -37,7 +37,7 @@ func (s sound) getSounds(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s sound) createSound(w http.ResponseWriter, req *http.Request) {
-	var data map[string]*string
+	var data db.SoundPayload
 
 	bytes, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -49,12 +49,12 @@ func (s sound) createSound(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("Error unmarshalling []byte  ", err)
 	}
 
-	result := db.CreateSound(data)
+	result := db.CreateSound(&data)
 	Respond(w, result)
 }
 
 func (s sound) bulkCreateSounds(w http.ResponseWriter, req *http.Request) {
-	var data []map[string]*string
+	var data []*db.SoundPayload
 
 	bytes, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -82,7 +82,7 @@ func (s sound) updateSound(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id := vars["id"]
 
-	var data map[string]*string
+	var data db.SoundPayload
 
 	bytes, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -94,6 +94,6 @@ func (s sound) updateSound(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("Error unmarshalling []byte  ", err)
 	}
 
-	result := db.UpdateSound(id, data)
+	result := db.UpdateSound(id, &data)
 	Respond(w, result)
 }

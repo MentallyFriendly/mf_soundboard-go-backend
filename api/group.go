@@ -13,7 +13,7 @@ import (
 type group struct{}
 
 func (g group) registerRoutes(r *mux.Router) {
-	r.Path("/groups/{name}").HandlerFunc(g.getGroup).Methods("GET")
+	r.Path("/groups/{id}").HandlerFunc(g.getGroup).Methods("GET")
 	r.Path("/groups/{id}").HandlerFunc(g.deleteGroup).Methods("DELETE")
 	r.Path("/groups/{id}").HandlerFunc(g.updateGroup).Methods("PUT", "PATCH")
 	r.Path("/groups").HandlerFunc(g.getGroups).Methods("GET")
@@ -22,9 +22,9 @@ func (g group) registerRoutes(r *mux.Router) {
 
 func (g group) getGroup(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	name := vars["name"]
+	id := vars["id"]
 
-	result := db.GetGroup(name)
+	result := db.GetGroup(id)
 	Respond(w, result)
 }
 
@@ -34,7 +34,7 @@ func (g group) getGroups(w http.ResponseWriter, req *http.Request) {
 }
 
 func (g group) createGroup(w http.ResponseWriter, req *http.Request) {
-	var data map[string]*string
+	var data db.GroupPayload
 
 	bytes, err := ioutil.ReadAll(req.Body)
 	if err != nil {
@@ -47,7 +47,7 @@ func (g group) createGroup(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("Error unmarshalling bytes ", err)
 	}
 
-	result := db.CreateGroup(data)
+	result := db.CreateGroup(&data)
 	Respond(w, result)
 }
 
@@ -63,7 +63,7 @@ func (g group) updateGroup(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id := vars["id"]
 
-	var data map[string]*string
+	var data db.GroupPayload
 	bytes, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		fmt.Println("Error reading request body ", err)
@@ -75,6 +75,6 @@ func (g group) updateGroup(w http.ResponseWriter, req *http.Request) {
 		fmt.Println("Error unmarshalling bytes ", err)
 	}
 
-	result := db.UpdateGroup(id, data)
+	result := db.UpdateGroup(id, &data)
 	Respond(w, result)
 }

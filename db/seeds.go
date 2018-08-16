@@ -11,6 +11,11 @@ func migrateDatabase() {
 	runMigrate()
 }
 
+func dropDatabase() {
+	db.DropTableIfExists(&Sound{}, &Group{})
+	db.AutoMigrate(&Sound{}, &Group{})
+}
+
 func stringPointer(s string) *string {
 	return &s
 }
@@ -43,7 +48,7 @@ func runSeed() {
 			Letter: stringPointer("c"),
 			Groups: []Group{
 				Group{
-					Name: stringPointer("sound-efects"),
+					Name: stringPointer("sound-effects"),
 				},
 			},
 		},
